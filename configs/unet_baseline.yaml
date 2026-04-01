@@ -2,7 +2,7 @@ stage: 1
 model_name: unet_baseline
 
 data:
-  raw_dir: data/raw
+  raw_dir: /scratch/dhumal.a/LiTS-UNets/data/raw
   processed_dir: data/processed
   train_manifest: data/processed/train.csv
   val_manifest: data/processed/val.csv

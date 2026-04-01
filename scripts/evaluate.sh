@@ -1,31 +1,58 @@
-#!/usr/bin/env bash
+#!/bin/bash
+#================================================================
+# SLURM Job Script: LiTS Evaluation
+# Northeastern University - Explorer Cluster
+#================================================================
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32GB
 #SBATCH --time=08:00:00
+#SBATCH --job-name=lits_eval
 #SBATCH --output=logs/outputs/train_%j.out
 #SBATCH --error=logs/errors/train_%j.err
 
-set -euo pipefail
+echo "========================================"
+echo "LiTS Evaluation"
+echo "Date: $(date)"
+echo "Node: $(hostname)"
+echo "Job ID: $SLURM_JOB_ID"
+echo "========================================"
 
-source ~/.bashrc
-conda activate lits-seg
+# Load modules
+module purge
+module load anaconda3
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "${PROJECT_ROOT}"
+# Activate environment
+source activate lits-seg
+
+# Print GPU info
+echo ""
+echo "GPU Info:"
+nvidia-smi
+echo ""
+
+# Navigate to project directory
+cd $SLURM_SUBMIT_DIR
 
 CONFIG="${1:-configs/unet_baseline.yaml}"
 CHECKPOINT="${2:-checkpoints/unet_baseline/best.pth}"
 
 if [ ! -f "${CHECKPOINT}" ]; then
-    echo "ERROR: Checkpoint not found: ${CHECKPOINT}" >&2
+    echo "ERROR: Checkpoint not found: ${CHECKPOINT}"
     exit 1
 fi
 
-echo "Running evaluation..."
-echo "  Config:     ${CONFIG}"
-echo "  Checkpoint: ${CHECKPOINT}"
+echo "Config:     ${CONFIG}"
+echo "Checkpoint: ${CHECKPOINT}"
+echo "========================================"
+
+echo "Starting evaluation..."
 
 python src/train.py --config "${CONFIG}" --mode evaluate --checkpoint "${CHECKPOINT}"
+
+echo ""
+echo "========================================"
+echo "Evaluation finished at $(date)"
+echo "========================================"
