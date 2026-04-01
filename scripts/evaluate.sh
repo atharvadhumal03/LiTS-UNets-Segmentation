@@ -28,4 +28,4 @@ echo "Running evaluation..."
 echo "  Config:     ${CONFIG}"
 echo "  Checkpoint: ${CHECKPOINT}"
 
-python src/evaluate.py --config "${CONFIG}" --checkpoint "${CHECKPOINT}"
+python src/train.py --config "${CONFIG}" --mode evaluate --checkpoint "${CHECKPOINT}"

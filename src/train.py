@@ -29,6 +29,15 @@ def get_device():
     return torch.device("cpu")
 
 
+def build_model(cfg, device):
+    return UNet(
+        in_channels=cfg["model"]["in_channels"],
+        num_classes=cfg["data"]["num_classes"],
+        encoder_channels=cfg["model"]["encoder_channels"],
+        bottleneck_channels=cfg["model"]["bottleneck_channels"],
+    ).to(device)
+
+
 def save_checkpoint(state, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(state, path)
@@ -49,11 +58,11 @@ def load_checkpoint(path, model, optimizer=None, scheduler=None):
 def run_epoch(model, loader, criterion, optimizer, device, cfg, scaler, is_train):
     model.train() if is_train else model.eval()
 
-    total_loss = 0.0
+    total_loss  = 0.0
     metric_list = []
     num_classes = cfg["data"]["num_classes"]
-    grad_clip = cfg["training"]["gradient_clip_max_norm"]
-    use_amp = scaler is not None
+    grad_clip   = cfg["training"]["gradient_clip_max_norm"]
+    use_amp     = scaler is not None
 
     ctx = torch.enable_grad() if is_train else torch.no_grad()
     with ctx:
@@ -89,6 +98,43 @@ def run_epoch(model, loader, criterion, optimizer, device, cfg, scaler, is_train
     return total_loss / len(loader), aggregate_metrics(metric_list)
 
 
+# ── Test evaluation ───────────────────────────────────────────────────────────
+
+def test(cfg, device, checkpoint_path):
+    model = build_model(cfg, device)
+    ckpt  = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(ckpt["model_state"])
+    model.eval()
+
+    data_cfg    = cfg["data"]
+    test_ds     = LiTSDataset(data_cfg["test_manifest"], augment=False)
+    test_loader = DataLoader(
+        test_ds,
+        batch_size=cfg["training"]["batch_size"],
+        shuffle=False,
+        num_workers=data_cfg["num_workers"],
+    )
+
+    metric_list = []
+    with torch.no_grad():
+        for images, masks in test_loader:
+            images = images.to(device)
+            masks  = masks.to(device)
+            preds  = model(images).argmax(dim=1)
+            metric_list.append(compute_metrics(preds, masks, data_cfg["num_classes"]))
+
+    results = aggregate_metrics(metric_list)
+
+    print("\n── Test Results ─────────────────────────────────")
+    print(f"  Dice  Liver : {results.get('dice_liver', 0):.4f}")
+    print(f"  Dice  Tumor : {results.get('dice_tumor', 0):.4f}")
+    print(f"  IoU   Liver : {results.get('iou_liver',  0):.4f}")
+    print(f"  IoU   Tumor : {results.get('iou_tumor',  0):.4f}")
+    print("─────────────────────────────────────────────────")
+
+    return results
+
+
 # ── Training loop ─────────────────────────────────────────────────────────────
 
 def train(cfg, device, use_wb=False):
@@ -104,25 +150,17 @@ def train(cfg, device, use_wb=False):
 
     data_cfg  = cfg["data"]
     train_cfg = cfg["training"]
-    model_cfg = cfg["model"]
     loss_cfg  = cfg["loss"]
     sched_cfg = cfg["scheduler"]
     paths_cfg = cfg["paths"]
 
-    model = UNet(
-        in_channels=model_cfg["in_channels"],
-        num_classes=data_cfg["num_classes"],
-        encoder_channels=model_cfg["encoder_channels"],
-        bottleneck_channels=model_cfg["bottleneck_channels"],
-    ).to(device)
-
+    model     = build_model(cfg, device)
     criterion = CombinedLoss(
         num_classes=data_cfg["num_classes"],
         ce_weight=loss_cfg["ce_weight"],
         dice_weight=loss_cfg["dice_weight"],
         class_weights=loss_cfg["class_weights"],
     ).to(device)
-
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=train_cfg["learning_rate"],
@@ -145,24 +183,21 @@ def train(cfg, device, use_wb=False):
     use_amp = cfg["mixed_precision"]["enabled"] and device.type == "cuda"
     scaler  = torch.cuda.amp.GradScaler() if use_amp else None
 
-    train_ds = LiTSDataset(data_cfg["train_manifest"], augment=True)
-    val_ds   = LiTSDataset(data_cfg["val_manifest"],   augment=False)
+    pin          = data_cfg["pin_memory"] and device.type == "cuda"
+    train_loader = DataLoader(LiTSDataset(data_cfg["train_manifest"], augment=True),
+                              batch_size=train_cfg["batch_size"], shuffle=True,
+                              num_workers=data_cfg["num_workers"], pin_memory=pin)
+    val_loader   = DataLoader(LiTSDataset(data_cfg["val_manifest"], augment=False),
+                              batch_size=train_cfg["batch_size"], shuffle=False,
+                              num_workers=data_cfg["num_workers"], pin_memory=pin)
 
-    pin = data_cfg["pin_memory"] and device.type == "cuda"
-    train_loader = DataLoader(train_ds, batch_size=train_cfg["batch_size"],
-                              shuffle=True,  num_workers=data_cfg["num_workers"],
-                              pin_memory=pin)
-    val_loader   = DataLoader(val_ds,   batch_size=train_cfg["batch_size"],
-                              shuffle=False, num_workers=data_cfg["num_workers"],
-                              pin_memory=pin)
-
-    start_epoch     = 0
-    best_dice       = 0.0
+    start_epoch      = 0
+    best_dice        = 0.0
     patience_counter = 0
-    patience_limit  = train_cfg["early_stopping_patience"]
-    ckpt_every      = train_cfg["checkpoint_every_n_epochs"]
-    ckpt_dir        = paths_cfg["checkpoint_dir"]
-    best_path       = os.path.join(ckpt_dir, paths_cfg["best_model_filename"])
+    patience_limit   = train_cfg["early_stopping_patience"]
+    ckpt_every       = train_cfg["checkpoint_every_n_epochs"]
+    ckpt_dir         = paths_cfg["checkpoint_dir"]
+    best_path        = os.path.join(ckpt_dir, paths_cfg["best_model_filename"])
 
     resume_path = train_cfg.get("resume_checkpoint")
     if resume_path and os.path.exists(resume_path):
@@ -170,19 +205,18 @@ def train(cfg, device, use_wb=False):
         print(f"Resumed from {resume_path} at epoch {start_epoch}")
 
     for epoch in range(start_epoch, train_cfg["epochs"]):
-        train_loss, train_m = run_epoch(model, train_loader, criterion, optimizer,
-                                        device, cfg, scaler, is_train=True)
-        val_loss,   val_m   = run_epoch(model, val_loader,   criterion, None,
-                                        device, cfg, scaler, is_train=False)
+        train_loss, _ = run_epoch(model, train_loader, criterion, optimizer,
+                                  device, cfg, scaler, is_train=True)
+        val_loss, val_m = run_epoch(model, val_loader, criterion, None,
+                                    device, cfg, scaler, is_train=False)
 
-        val_dice = np.mean([val_m.get("dice_liver", 0.0), val_m.get("dice_tumor", 0.0)])
+        val_dice  = np.mean([val_m.get("dice_liver", 0.0), val_m.get("dice_tumor", 0.0)])
+        lr_now    = optimizer.param_groups[0]["lr"]
 
         if sched_type == "plateau":
             scheduler.step(val_loss)
         else:
             scheduler.step()
-
-        lr_now = optimizer.param_groups[0]["lr"]
 
         print(
             f"Epoch {epoch+1:04d} | "
@@ -204,17 +238,16 @@ def train(cfg, device, use_wb=False):
             })
 
         if (epoch + 1) % ckpt_every == 0:
-            periodic_path = os.path.join(ckpt_dir, f"epoch_{epoch+1:04d}.pth")
             save_checkpoint({
                 "epoch": epoch,
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "scheduler_state": scheduler.state_dict(),
                 "best_dice": best_dice,
-            }, periodic_path)
+            }, os.path.join(ckpt_dir, f"epoch_{epoch+1:04d}.pth"))
 
         if val_dice > best_dice:
-            best_dice = val_dice
+            best_dice        = val_dice
             patience_counter = 0
             save_checkpoint({
                 "epoch": epoch,
@@ -230,10 +263,17 @@ def train(cfg, device, use_wb=False):
                 print(f"Early stopping at epoch {epoch + 1}")
                 break
 
+    print(f"\nTraining complete. Best val Dice: {best_dice:.4f}")
+
+    # Auto-run test evaluation on best checkpoint
+    if os.path.exists(best_path):
+        test_results = test(cfg, device, best_path)
+        if use_wb:
+            wandb.log({f"test_{k}": v for k, v in test_results.items()})
+
     if use_wb:
         wandb.finish()
 
-    print(f"Training complete. Best val Dice: {best_dice:.4f}")
     return best_path
 
 
@@ -241,20 +281,30 @@ def train(cfg, device, use_wb=False):
 
 def main():
     parser = argparse.ArgumentParser(description="LiTS Stage 1 — Vanilla U-Net")
-    parser.add_argument("--config", default="configs/unet_baseline.yaml")
-    parser.add_argument("--wandb",  action="store_true", help="Enable W&B logging")
-    parser.add_argument("--resume", default=None, help="Path to checkpoint to resume from")
+    parser.add_argument("--config",     default="configs/unet_baseline.yaml")
+    parser.add_argument("--mode",       choices=["train", "evaluate"], default="train")
+    parser.add_argument("--wandb",      action="store_true", help="Enable W&B logging")
+    parser.add_argument("--resume",     default=None, help="Path to checkpoint to resume from")
+    parser.add_argument("--checkpoint", default=None, help="Checkpoint for evaluate mode")
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
-
-    if args.resume:
-        cfg["training"]["resume_checkpoint"] = args.resume
-
+    cfg    = load_config(args.config)
     device = get_device()
     print(f"Device: {device}")
 
-    train(cfg, device, use_wb=args.wandb)
+    if args.mode == "train":
+        if args.resume:
+            cfg["training"]["resume_checkpoint"] = args.resume
+        train(cfg, device, use_wb=args.wandb)
+
+    elif args.mode == "evaluate":
+        checkpoint_path = args.checkpoint or os.path.join(
+            cfg["paths"]["checkpoint_dir"], cfg["paths"]["best_model_filename"]
+        )
+        if not os.path.exists(checkpoint_path):
+            print(f"Checkpoint not found: {checkpoint_path}", file=sys.stderr)
+            sys.exit(1)
+        test(cfg, device, checkpoint_path)
 
 
 if __name__ == "__main__":
