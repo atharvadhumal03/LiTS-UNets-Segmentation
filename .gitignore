@@ -1,0 +1,42 @@
+# Environment
+.env
+
+# Data (never push)
+data/
+
+# Model checkpoints (never push)
+checkpoints/
+
+# SLURM logs (never push)
+logs/
+
+# W&B artifacts
+wandb/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# NIfTI and PyTorch files
+*.nii
+*.nii.gz
+*.pth
+*.pt
+
+# Markdown (except README)
+*.md
+!README.md
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Conda
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/

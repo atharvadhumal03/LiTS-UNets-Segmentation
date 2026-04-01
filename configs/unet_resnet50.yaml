@@ -1,0 +1,4 @@
+stage: 2
+model_name: unet_resnet50
+
+# Stub — populate before Stage 2 implementation
