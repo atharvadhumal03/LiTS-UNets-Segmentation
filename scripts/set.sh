@@ -5,9 +5,8 @@ set -euo pipefail
 # Run this once before anything else on the cluster.
 
 module purge
-module load cuda/12.1
-module load gcc/11.3
-module load conda
+module load cuda/12.1.1
+module load anaconda3/2024.06
 
 ENV_NAME="lits-seg"
 ENV_FILE="environment.yaml"
