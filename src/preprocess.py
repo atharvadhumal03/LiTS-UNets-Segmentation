@@ -39,8 +39,12 @@ def window_and_normalize(slice_2d, hu_min, hu_max):
 
 
 def extract_slices(scan_idx, raw_dir, out_dir, hu_min, hu_max, smoke_limit=None):
-    vol = nib.load(os.path.join(raw_dir, f"volume-{scan_idx}.nii")).get_fdata(dtype=np.float32)
-    seg = nib.load(os.path.join(raw_dir, f"segmentation-{scan_idx}.nii")).get_fdata().astype(np.int16)
+    try:
+        vol = nib.load(os.path.join(raw_dir, f"volume-{scan_idx}.nii")).get_fdata(dtype=np.float32)
+        seg = nib.load(os.path.join(raw_dir, f"segmentation-{scan_idx}.nii")).get_fdata().astype(np.int16)
+    except OSError as e:
+        print(f"  [WARNING] Skipping scan {scan_idx}: {e}")
+        return []
 
     records = []
     extracted = 0

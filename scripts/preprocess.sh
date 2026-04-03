@@ -24,7 +24,8 @@ module purge
 module load anaconda3/2024.06
 
 # Activate environment
-source activate lits-seg
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate lits-seg
 
 # Navigate to project directory
 cd /home/dhumal.a/LiTS-UNets
