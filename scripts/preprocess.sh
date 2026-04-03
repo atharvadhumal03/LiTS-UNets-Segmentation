@@ -31,7 +31,8 @@ mkdir -p logs/outputs logs/errors data/processed
 echo "Starting preprocessing..."
 echo "========================================"
 
-conda run -n lits-seg python src/preprocess.py --config configs/unet_baseline.yaml
+source activate lits-seg
+python src/preprocess.py --config configs/unet_baseline.yaml
 
 echo ""
 echo "========================================"

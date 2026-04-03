@@ -19,7 +19,7 @@ else
     conda env create --name "${ENV_NAME}" --file "${ENV_FILE}"
 fi
 
-conda activate "${ENV_NAME}"
+source activate "${ENV_NAME}"
 
 echo "Verifying imports..."
 python -c "import torch;                        print('torch:',   torch.__version__)"
