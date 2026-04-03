@@ -23,10 +23,6 @@ echo "========================================"
 module purge
 module load anaconda3/2024.06
 
-# Activate environment
-source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate lits-seg
-
 # Navigate to project directory
 cd /home/dhumal.a/LiTS-UNets
 
@@ -35,7 +31,7 @@ mkdir -p logs/outputs logs/errors data/processed
 echo "Starting preprocessing..."
 echo "========================================"
 
-python src/preprocess.py --config configs/unet_baseline.yaml
+conda run -n lits-seg python src/preprocess.py --config configs/unet_baseline.yaml
 
 echo ""
 echo "========================================"
