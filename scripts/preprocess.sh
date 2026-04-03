@@ -3,15 +3,14 @@
 # SLURM Job Script: LiTS Preprocessing
 # Northeastern University - Explorer Cluster
 #================================================================
-#SBATCH --partition=gpu
+#SBATCH --partition=short
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:a100:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32GB
-#SBATCH --time=08:00:00
+#SBATCH --time=02:00:00
 #SBATCH --job-name=lits_preprocess
-#SBATCH --output=logs/outputs/train_%j.out
-#SBATCH --error=logs/errors/train_%j.err
+#SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/preprocess_%j.out
+#SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/preprocess_%j.err
 
 echo "========================================"
 echo "LiTS Preprocessing"
@@ -22,19 +21,13 @@ echo "========================================"
 
 # Load modules
 module purge
-module load anaconda3
+module load anaconda3/2024.06
 
 # Activate environment
 source activate lits-seg
 
-# Print GPU info
-echo ""
-echo "GPU Info:"
-nvidia-smi
-echo ""
-
 # Navigate to project directory
-cd $SLURM_SUBMIT_DIR
+cd /home/dhumal.a/LiTS-UNets
 
 mkdir -p logs/outputs logs/errors data/processed
 
