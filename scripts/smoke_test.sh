@@ -42,8 +42,8 @@ echo "========================================"
 echo "[1/3] Preprocessing (smoke mode — 10 slices)..."
 $PYTHON src/preprocess.py --config configs/smoke_test.yaml --smoke
 
-echo "[2/3] Training (2 epochs)..."
-$PYTHON src/train.py --config configs/smoke_test.yaml
+echo "[2/3] Training with W&B (2 epochs)..."
+$PYTHON src/train.py --config configs/smoke_test.yaml --wandb
 
 echo "[3/3] W&B import check..."
 $PYTHON -c "import wandb; print('wandb import OK')"
