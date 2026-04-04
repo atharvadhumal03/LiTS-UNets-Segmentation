@@ -98,16 +98,7 @@ def main():
 
     smoke_total = smoke_cfg.get("num_slices", 10) if args.smoke else None
 
-    # Smoke mode writes to a separate directory to avoid overwriting real data
-    if args.smoke:
-        processed_dir = os.path.join(processed_dir, "smoke")
-        manifest_map_override = {
-            "train": os.path.join(processed_dir, "train.csv"),
-            "val":   os.path.join(processed_dir, "val.csv"),
-            "test":  os.path.join(processed_dir, "test.csv"),
-        }
-    else:
-        manifest_map_override = None
+    manifest_map_override = None
 
     scan_ids = discover_scans(raw_dir)
     if not scan_ids:
@@ -118,7 +109,7 @@ def main():
     print(f"Split: {len(train_ids)} train / {len(val_ids)} val / {len(test_ids)} test scans")
 
     split_map = {"train": train_ids, "val": val_ids, "test": test_ids}
-    manifest_map = manifest_map_override or {
+    manifest_map = {
         "train": data_cfg["train_manifest"],
         "val": data_cfg["val_manifest"],
         "test": data_cfg["test_manifest"],
