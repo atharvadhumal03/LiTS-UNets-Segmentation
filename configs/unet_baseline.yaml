@@ -3,10 +3,10 @@ model_name: unet_baseline
 
 data:
   raw_dir: /scratch/dhumal.a/LiTS-UNets/data/raw
-  processed_dir: data/processed
-  train_manifest: data/processed/train.csv
-  val_manifest: data/processed/val.csv
-  test_manifest: data/processed/test.csv
+  processed_dir: /scratch/dhumal.a/LiTS-UNets/data/processed
+  train_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/train.csv
+  val_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/val.csv
+  test_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/test.csv
   num_classes: 3
   num_workers: 4
   pin_memory: true
@@ -50,7 +50,7 @@ mixed_precision:
   enabled: true
 
 paths:
-  checkpoint_dir: checkpoints/unet_baseline
+  checkpoint_dir: /scratch/dhumal.a/LiTS-UNets/checkpoints/unet_baseline
   best_model_filename: best.pth
 
 smoke_test:
