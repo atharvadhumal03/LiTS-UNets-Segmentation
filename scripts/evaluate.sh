@@ -22,10 +22,10 @@ echo "========================================"
 
 # Load modules
 module purge
-module load anaconda3
+module load anaconda3/2024.06
 
 # Activate environment
-source activate lits-seg
+PYTHON=~/.conda/envs/lits-seg/bin/python
 
 # Print GPU info
 echo ""
@@ -50,7 +50,7 @@ echo "========================================"
 
 echo "Starting evaluation..."
 
-python src/train.py --config "${CONFIG}" --mode evaluate --checkpoint "${CHECKPOINT}"
+$PYTHON src/train.py --config "${CONFIG}" --mode evaluate --checkpoint "${CHECKPOINT}"
 
 echo ""
 echo "========================================"

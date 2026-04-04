@@ -22,10 +22,10 @@ echo "========================================"
 
 # Load modules
 module purge
-module load anaconda3
+module load anaconda3/2024.06
 
 # Activate environment
-source activate lits-seg
+PYTHON=~/.conda/envs/lits-seg/bin/python
 
 # Print GPU info
 echo ""
@@ -54,7 +54,7 @@ echo "========================================"
 
 echo "Starting inference..."
 
-python src/inference.py \
+$PYTHON src/inference.py \
     --config     "${CONFIG}" \
     --checkpoint "${CHECKPOINT}" \
     --input      "${INPUT_PATH}" \

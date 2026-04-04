@@ -22,10 +22,10 @@ echo "========================================"
 
 # Load modules
 module purge
-module load anaconda3
+module load anaconda3/2024.06
 
 # Activate environment
-source activate lits-seg
+PYTHON=~/.conda/envs/lits-seg/bin/python
 
 # Print GPU info
 echo ""
@@ -48,9 +48,9 @@ echo "Starting training..."
 
 if [ -n "${RESUME}" ]; then
     echo "Resuming from: ${RESUME}"
-    python src/train.py --config "${CONFIG}" --resume "${RESUME}"
+    $PYTHON src/train.py --config "${CONFIG}" --resume "${RESUME}"
 else
-    python src/train.py --config "${CONFIG}"
+    $PYTHON src/train.py --config "${CONFIG}"
 fi
 
 echo ""
