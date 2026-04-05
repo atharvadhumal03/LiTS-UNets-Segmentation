@@ -7,8 +7,8 @@ data/
 # Model checkpoints (never push)
 checkpoints/
 
-# SLURM logs (never push)
-logs/
+# SLURM logs — track outputs, not errors
+logs/errors/
 
 # W&B artifacts
 wandb/
@@ -24,9 +24,10 @@ __pycache__/
 *.pth
 *.pt
 
-# Markdown (except README)
+# Markdown (except README and results)
 *.md
 !README.md
+!docs/results.md
 
 # Jupyter
 .ipynb_checkpoints/
