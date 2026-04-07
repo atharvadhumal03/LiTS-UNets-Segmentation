@@ -3,12 +3,12 @@ model_name: unet_resnet50
 
 data:
   raw_dir: /scratch/dhumal.a/LiTS-UNets/data/raw
-  processed_dir: /scratch/dhumal.a/LiTS-UNets/data/processed
-  train_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/train.csv
-  val_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/val.csv
-  test_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/test.csv
+  processed_dir: /scratch/dhumal.a/LiTS-UNets/data/processed/smoke
+  train_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/smoke/train.csv
+  val_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/smoke/val.csv
+  test_manifest: /scratch/dhumal.a/LiTS-UNets/data/processed/smoke/test.csv
   num_classes: 3
-  num_workers: 4
+  num_workers: 2
   pin_memory: true
 
 preprocessing:
@@ -21,17 +21,17 @@ preprocessing:
 model:
   encoder_name: resnet50
   encoder_weights: imagenet
-  in_channels: 3           # single CT channel repeated 3x for ImageNet encoder
+  in_channels: 3
   num_classes: 3
 
 training:
-  epochs: 100
-  batch_size: 8
+  epochs: 2
+  batch_size: 2
   learning_rate: 1.0e-4
   weight_decay: 1.0e-5
   gradient_clip_max_norm: 1.0
-  checkpoint_every_n_epochs: 5
-  early_stopping_patience: 15
+  checkpoint_every_n_epochs: 1
+  early_stopping_patience: 5
   resume_checkpoint: null
 
 loss:
@@ -41,17 +41,17 @@ loss:
 
 scheduler:
   type: cosine
-  T_max: 100
+  T_max: 2
   eta_min: 1.0e-7
   plateau_factor: 0.5
-  plateau_patience: 7
+  plateau_patience: 2
   plateau_min_lr: 1.0e-7
 
 mixed_precision:
   enabled: true
 
 paths:
-  checkpoint_dir: /scratch/dhumal.a/LiTS-UNets/checkpoints/unet_resnet50
+  checkpoint_dir: /scratch/dhumal.a/LiTS-UNets/checkpoints/smoke_stage2
   best_model_filename: best.pth
 
 smoke_test:
