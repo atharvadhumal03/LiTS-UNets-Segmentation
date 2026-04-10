@@ -1,4 +1,20 @@
 stage: 3
-model_name: nnunet
+model_name: nnunet_3d_fullres
 
-# Stub — populate before Stage 3 implementation
+data:
+  raw_dir: /scratch/dhumal.a/LiTS-UNets/data/raw
+
+preprocessing:
+  val_split: 0.15
+  test_split: 0.15
+  random_seed: 42
+
+nnunet:
+  dataset_id: 1
+  dataset_name: Dataset001_LiTS
+  configuration: 3d_fullres
+  fold: 0
+  trainer: nnUNetTrainer
+  raw_dir: /scratch/dhumal.a/LiTS-UNets/nnunet/raw
+  preprocessed_dir: /scratch/dhumal.a/LiTS-UNets/nnunet/preprocessed
+  results_dir: /scratch/dhumal.a/LiTS-UNets/nnunet/results
