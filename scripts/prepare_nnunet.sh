@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32GB
-#SBATCH --time=02:00:00
+#SBATCH --time=04:00:00
 #SBATCH --job-name=lits_nnunet_prep
 #SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_prep_%j.out
 #SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_prep_%j.err
@@ -33,13 +33,10 @@ export nnUNet_results=/scratch/dhumal.a/LiTS-UNets/nnunet/results
 
 mkdir -p $nnUNet_raw $nnUNet_preprocessed $nnUNet_results
 
-echo "[1/2] Converting data to nnU-Net format..."
-$PYTHON src/prepare_nnunet.py --config configs/nnunet.yaml
-
-echo "[2/2] Running nnU-Net fingerprinting and preprocessing..."
+echo "[1/1] Running nnU-Net fingerprinting and preprocessing..."
+echo "(Data conversion already complete — skipping)"
 ~/.conda/envs/lits-seg/bin/nnUNetv2_plan_and_preprocess \
     -d 1 \
-    --verify_dataset_integrity \
     -c 3d_fullres
 
 echo ""
