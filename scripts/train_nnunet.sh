@@ -39,6 +39,9 @@ export nnUNet_results=/scratch/dhumal.a/LiTS-UNets/nnunet/results
 echo "Starting nnU-Net 3D full-res training (fold 0)..."
 echo "========================================"
 
+# Disable torch.compile — takes hours to compile on first run
+export nnUNet_compile=0
+
 ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
     --npz \
     -device cuda
