@@ -41,9 +41,10 @@ echo "========================================"
 
 # Disable torch.compile — takes hours to compile on first run
 export nnUNet_compile=0
+# Limit DA workers to avoid long initialization on shared nodes
+export nnUNet_n_proc_DA=4
 
 ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
-    --npz \
     -device cuda
 
 echo ""
