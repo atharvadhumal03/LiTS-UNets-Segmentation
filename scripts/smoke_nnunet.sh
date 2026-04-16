@@ -3,9 +3,9 @@
 # SLURM Job Script: LiTS nnU-Net Smoke Test (3 epochs)
 # Northeastern University - Explorer Cluster
 #================================================================
-#SBATCH --partition=gpu
+#SBATCH --partition=gpu-short
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:v100-sxm2:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
 #SBATCH --time=01:00:00
