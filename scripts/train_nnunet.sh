@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
-#SBATCH --time=24:00:00
+#SBATCH --time=08:00:00
 #SBATCH --job-name=lits_nnunet_train
 #SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_train_%j.out
 #SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_train_%j.err
