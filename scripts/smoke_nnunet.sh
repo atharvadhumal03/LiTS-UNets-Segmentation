@@ -1,6 +1,6 @@
 #!/bin/bash
 #================================================================
-# SLURM Job Script: LiTS nnU-Net 3D Full-Res Training
+# SLURM Job Script: LiTS nnU-Net Smoke Test (3 epochs)
 # Northeastern University - Explorer Cluster
 #================================================================
 #SBATCH --partition=gpu
@@ -8,13 +8,13 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
-#SBATCH --time=24:00:00
-#SBATCH --job-name=lits_nnunet_train
-#SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_train_%j.out
-#SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_train_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --job-name=lits_nnunet_smoke
+#SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_smoke_%j.out
+#SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_smoke_%j.err
 
 echo "========================================"
-echo "LiTS nnU-Net 3D Full-Res Training"
+echo "LiTS nnU-Net Smoke Test (3 epochs)"
 echo "Date: $(date)"
 echo "Node: $(hostname)"
 echo "Job ID: $SLURM_JOB_ID"
@@ -24,30 +24,31 @@ module purge
 module load cuda/12.1.1
 module load anaconda3/2024.06
 
-echo ""
 echo "GPU Info:"
 nvidia-smi
 echo ""
 
 cd /home/dhumal.a/LiTS-UNets
 
-# Set nnU-Net environment variables
 export nnUNet_raw=/scratch/dhumal.a/LiTS-UNets/nnunet/raw
 export nnUNet_preprocessed=/scratch/dhumal.a/LiTS-UNets/nnunet/preprocessed
 export nnUNet_results=/scratch/dhumal.a/LiTS-UNets/nnunet/results
 
-echo "Starting nnU-Net 3D full-res training (fold 0)..."
-echo "========================================"
-
-# Disable torch.compile — takes hours to compile on first run
 export nnUNet_compile=0
-# Set DA workers to 0 to avoid multiprocessing deadlock on HPC
 export nnUNet_n_proc_DA=0
 
-~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
+echo "Starting smoke test (3 epochs)..."
+echo "========================================"
+
+PYTHONPATH=/home/dhumal.a/LiTS-UNets \
+    ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
+    -tr nnUNetSmokeTrainer \
     -device cuda
 
 echo ""
 echo "========================================"
-echo "Training finished at $(date)"
+echo "Smoke test done at $(date)"
+echo ""
+echo "Training log:"
+cat /scratch/dhumal.a/LiTS-UNets/nnunet/results/Dataset001_LiTS/nnUNetSmokeTrainer__nnUNetPlans__3d_fullres/fold_0/training_log_*.txt 2>/dev/null || echo "No training log found."
 echo "========================================"
