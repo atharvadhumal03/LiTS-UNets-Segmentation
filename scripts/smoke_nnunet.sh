@@ -40,8 +40,7 @@ export nnUNet_n_proc_DA=0
 echo "Starting smoke test (3 epochs)..."
 echo "========================================"
 
-PYTHONPATH=/home/dhumal.a/LiTS-UNets \
-    ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
+~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
     -tr nnUNetSmokeTrainer \
     -device cuda
 
