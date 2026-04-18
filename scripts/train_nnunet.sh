@@ -45,6 +45,7 @@ export nnUNet_compile=0
 export nnUNet_n_proc_DA=0
 
 ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
+    --c \
     -device cuda
 
 echo ""
