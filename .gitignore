@@ -28,6 +28,7 @@ __pycache__/
 *.md
 !README.md
 !docs/results.md
+!docs/nnunet_training_log.md
 
 # Jupyter
 .ipynb_checkpoints/
