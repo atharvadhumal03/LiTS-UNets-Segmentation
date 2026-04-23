@@ -10,6 +10,7 @@
 #SBATCH --mem=64GB
 #SBATCH --time=08:00:00
 #SBATCH --job-name=lits_nnunet_train
+#SBATCH --exclude=d1029
 #SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_train_%j.out
 #SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_train_%j.err
 
@@ -45,7 +46,6 @@ export nnUNet_compile=0
 export nnUNet_n_proc_DA=0
 
 ~/.conda/envs/lits-seg/bin/nnUNetv2_train 1 3d_fullres 0 \
-    -tr nnUNetLiTSTrainer \
     --c \
     -device cuda
 
