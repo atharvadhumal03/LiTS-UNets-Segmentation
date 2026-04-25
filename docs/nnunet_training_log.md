@@ -12,15 +12,17 @@
 
 | Run | Date | Job ID | GPU | Epochs Covered | Epochs Gained | First Dice [Liver, Tumor] | Last Dice [Liver, Tumor] | Last Train Loss | Last Val Loss |
 |-----|------|--------|-----|---------------|--------------|--------------------------|--------------------------|----------------|---------------|
-| 1 | Apr 12 00:40 | 5877824 | V100 | 0 → 558 | 559 | [0.706, 0.000] | [0.910, 0.506] | -0.6604 | -0.4220 |
-| 2 | Apr 12 11:07 | 5884642 | V100 | 0 → 451 | 452 | [0.677, 0.000] | [0.919, 0.373] | -0.6353 | -0.3642 |
-| 3 | Apr 13 13:23 | 5911321 | T4 | 0 → 3 | 4 | [0.650, 0.000] | [0.828, 0.000] | -0.0376 | -0.1215 |
-| 4 | Apr 16 04:50 | 5965867 | A100 | 0 → 188 | 189 | [0.631, 0.000] | [0.912, 0.341] | -0.5330 | -0.3684 |
-| 5 | Apr 17 03:00 | 5984599 | A100 | 0 → 192 | 193 | [0.646, 0.000] | [0.885, 0.373] | -0.5800 | -0.2742 |
-| 6 | Apr 17 23:55 | 6055395 | A100 | 0 → 179 | 180 | [0.661, 0.000] | [0.869, 0.419] | -0.5420 | -0.2943 |
-| 7 | Apr 18 22:11 | 6192681 | A100 | 150 → 251 | 102 | [0.905, 0.429] | [0.890, 0.376] | -0.6103 | -0.3167 |
-| 8 | Apr 21 13:15 | 6268167 | A100 | 250 → 441 | 192 | [0.906, 0.387] | [0.889, 0.300] | -0.6185 | -0.2160 |
-| 9 | Apr 22 01:47 | 6275563 | A100 | 400 → 593 | 194 | [0.928, 0.372] | [0.932, 0.394] | -0.6444 | -0.4237 |
+| 1 | Apr 12 | 5877824 | V100 | 0 → 558 | 559 | [0.706, 0.000] | [0.910, 0.506] | -0.6604 | -0.4220 |
+| 2 | Apr 12 | 5884642 | V100 | 0 → 451 | 452 | [0.677, 0.000] | [0.919, 0.373] | -0.6353 | -0.3642 |
+| 3 | Apr 13 | 5911321 | T4 | 0 → 3 | 4 | [0.650, 0.000] | [0.828, 0.000] | -0.0376 | -0.1215 |
+| 4 | Apr 16 | 5965867 | A100 | 0 → 188 | 189 | [0.631, 0.000] | [0.912, 0.341] | -0.5330 | -0.3684 |
+| 5 | Apr 17 | 5984599 | A100 | 0 → 192 | 193 | [0.646, 0.000] | [0.885, 0.373] | -0.5800 | -0.2742 |
+| 6 | Apr 17 | 6055395 | A100 | 0 → 179 | 180 | [0.661, 0.000] | [0.869, 0.419] | -0.5420 | -0.2943 |
+| 7 | Apr 18 | 6192681 | A100 | 150 → 251 | 102 | [0.905, 0.429] | [0.890, 0.376] | -0.6103 | -0.3167 |
+| 8 | Apr 21 | 6268167 | A100 | 250 → 441 | 192 | [0.906, 0.387] | [0.889, 0.300] | -0.6185 | -0.2160 |
+| 9 | Apr 22 | 6275563 | A100 | 400 → 593 | 194 | [0.928, 0.372] | [0.932, 0.394] | -0.6444 | -0.4237 |
+| 10 | Apr 24 | 6331827 | A100 | 700 → 885 | 186 | [0.903, 0.476] | [0.927, 0.493] | -0.703 | -0.377 |
+| 11 | Apr 25 | 6334713 | A100 | 880 → 999 | 120 | [0.938, 0.315] | [0.950, 0.534] | -0.691 | -0.536 |
 
 ---
 
@@ -35,8 +37,13 @@ Runs 1–6 all restarted from epoch 0 on each resubmission. Root causes:
 **Runs 7+ (resuming correctly):**
 `--c` flag added in run 7. nnU-Net now resumes from `checkpoint_latest.pth` on each resubmission.
 
-**Current canonical checkpoint:** epoch 593 (from run 9)
-**Epochs remaining:** ~407
+**Run 10 notes:**
+- Resumed from epoch 700 (last `save_every=10` checkpoint); epochs 701–741 from run 9 were lost because `checkpoint_latest.pth` saves every 10 epochs
+- Previous job (6310036) was cancelled — allocated node d1029 which hung silently for 3h without starting
+- Fix: added `--exclude=d1029` to `train_nnunet.sh`
+
+**Current canonical checkpoint:** epoch 999 (run 11, complete)
+**Epochs remaining:** 0 — training complete
 
 ---
 
@@ -50,8 +57,10 @@ Discarding restarts, the canonical training sequence is:
 | 150 – 251 | Run 7 (first resume) | 0.376 |
 | 250 – 441 | Run 8 | 0.300 |
 | 400 – 593 | Run 9 | 0.394 |
+| 700 – 885 | Run 10 | 0.493 |
+| 880 – 999 | Run 11 | 0.534 |
 
-**Current state: epoch 593 / 1000. ~407 epochs remaining.**
+**Training complete: epoch 999 / 1000. Final Tumor Dice: 0.534, Liver Dice: 0.950.**
 
 ---
 
@@ -67,6 +76,11 @@ Discarding restarts, the canonical training sequence is:
 | 407 | 0.928 | 0.372 | -0.644 | -0.424 |
 | 441 | 0.889 | 0.300 | -0.619 | -0.216 |
 | 593 | 0.932 | 0.394 | -0.644 | -0.424 |
+| 700 | 0.903 | 0.476 | -0.644 | -0.414 |
+| 782 | 0.934 | 0.237 | -0.676 | -0.259 |
+| 783 | 0.919 | 0.431 | -0.680 | -0.372 |
+| 885 | 0.927 | 0.493 | -0.703 | -0.377 |
+| 999 | 0.950 | 0.534 | -0.691 | -0.536 |
 
 ---
 
@@ -79,6 +93,8 @@ Discarding restarts, the canonical training sequence is:
 | Got T4 instead of A100 | SLURM allocates any available GPU | `--gres=gpu:a100:1` is a hint, not guaranteed |
 | Training restarted from epoch 0 | `--c` flag missing from nnUNetv2_train call | Added `--c` flag to `train_nnunet.sh` |
 | SLURM 8h time limit | Hard cluster limit on gpu partition | Resubmit with `--c`; nnU-Net auto-resumes |
+| Node d1029 hung silently for 3h | Bad compute node — no errors, no training | Added `--exclude=d1029` to `train_nnunet.sh` |
+| Lost epochs 701–741 on resume | `save_every=10` means checkpoint_latest is always a multiple of 10 | Acceptable tradeoff; max loss per timeout is 9 epochs |
 
 ---
 
