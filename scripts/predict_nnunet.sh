@@ -10,6 +10,7 @@
 #SBATCH --mem=32GB
 #SBATCH --time=02:00:00
 #SBATCH --job-name=lits_nnunet_pred
+#SBATCH --exclude=d1029
 #SBATCH --output=/home/dhumal.a/LiTS-UNets/logs/outputs/nnunet_pred_%j.out
 #SBATCH --error=/home/dhumal.a/LiTS-UNets/logs/errors/nnunet_pred_%j.err
 
@@ -48,8 +49,7 @@ echo "[1/2] Running predictions on test set..."
     -o $OUTPUT_DIR \
     -d 1 \
     -c 3d_fullres \
-    -f 0 \
-    --save_probabilities
+    -f 0
 
 echo "[2/2] Computing Dice and IoU on test set..."
 $PYTHON src/evaluate_nnunet.py --config configs/nnunet.yaml --predictions $OUTPUT_DIR
