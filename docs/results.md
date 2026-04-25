@@ -18,7 +18,11 @@
 
 ## Stage 3: nnU-Net
 
-_Pending_
+| Run | Epochs | Config | Val Dice Liver | Val Dice Tumor | Test Dice Liver | Test Dice Tumor | Test IoU Liver | Test IoU Tumor | Notes |
+|-----|--------|--------|---------------|---------------|----------------|----------------|---------------|---------------|-------|
+| 1 | 1000 | 3d_fullres, patch [128,128,128], batch 2 | 0.950 | 0.534 | — | — | — | — | A100-SXM4-80GB, SLURM jobs 6192681→6334713, fold 0 |
+
+_Test metrics pending — inference/evaluation not yet run._
 
 ---
 
