@@ -61,6 +61,7 @@ Discarding restarts, the canonical training sequence is:
 | 880 – 999 | Run 11 | 0.534 |
 
 **Training complete: epoch 999 / 1000. Final Tumor Dice: 0.534, Liver Dice: 0.950.**
+**Test set results (20 cases): Dice Liver 0.9481 / Tumor 0.6777 — IoU Liver 0.9034 / Tumor 0.5644.**
 
 ---
 
@@ -104,6 +105,6 @@ Discarding restarts, the canonical training sequence is:
 |------|---------|
 | Training script | `scripts/train_nnunet.sh` |
 | Smoke test script | `scripts/smoke_nnunet.sh` |
-| Custom smoke trainer | `nnunet_smoke_trainer.py` |
+| Custom smoke trainer | `models/nnunet_smoke_trainer.py` |
 | Checkpoints | `/scratch/dhumal.a/LiTS-UNets/nnunet/results/Dataset001_LiTS/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/` |
 | Training logs | Same directory, `training_log_*.txt` |

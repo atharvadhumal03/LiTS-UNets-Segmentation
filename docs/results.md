@@ -20,9 +20,7 @@
 
 | Run | Epochs | Config | Val Dice Liver | Val Dice Tumor | Test Dice Liver | Test Dice Tumor | Test IoU Liver | Test IoU Tumor | Notes |
 |-----|--------|--------|---------------|---------------|----------------|----------------|---------------|---------------|-------|
-| 1 | 1000 | 3d_fullres, patch [128,128,128], batch 2 | 0.950 | 0.534 | — | — | — | — | A100-SXM4-80GB, SLURM jobs 6192681→6334713, fold 0 |
-
-_Test metrics pending — inference/evaluation not yet run._
+| 1 | 1000 | 3d_fullres, patch [128,128,128], batch 2 | 0.950 | 0.534 | 0.9481 | 0.6777 | 0.9034 | 0.5644 | A100-SXM4-80GB, SLURM jobs 6192681→6334713, fold 0 |
 
 ---
 
@@ -32,4 +30,4 @@ _Test metrics pending — inference/evaluation not yet run._
 |-------|-------------|----------------|----------------|---------------|---------------|
 | 1 | Vanilla U-Net | 0.8651 | 0.6898 | 0.8047 | 0.6363 |
 | 2 | U-Net + ResNet50 | 0.8990 | 0.6886 | 0.8477 | 0.6357 |
-| 3 | nnU-Net | — | — | — | — |
+| 3 | nnU-Net | 0.9481 | 0.6777 | 0.9034 | 0.5644 |
